@@ -133,11 +133,56 @@ def hill_sided(_x):
 
 def gerber(_x):
     x, y = unpack2D(_x)
-    return ((1./1.) * np.exp(-((x-.25)**2)/0.09) +
-            (1./1.) * np.exp(-((y-.25)**2)/0.09) +
-            (1./3.) * np.exp(-((x-.75)**2)/0.01) +
-            (1./2.) * np.exp(-((y-.75)**2)/0.01))
+    return ((2./4.) * np.exp(-((x-.25)**2)/0.09) +
+            (3./4.) * np.exp(-((y-.25)**2)/0.09) +
+            (3./4.) * np.exp(-((x-.75)**2)/0.01) +
+            (4./4.) * np.exp(-((y-.75)**2)/0.01))
 
+def gerber_rotated(_x):
+    theta = math.pi/6.
+    u, v = unpack2D(_x)
+    u = u + 0.0
+    v = v - 0.4
+    x = u*math.cos(theta) - v*math.sin(theta)
+    y = u*math.sin(theta) + v*math.cos(theta)
+    return ((2./4.) * np.exp(-((x-.25)**2)/0.09) +
+            (3./4.) * np.exp(-((y-.25)**2)/0.09) +
+            (3./4.) * np.exp(-((x-.75)**2)/0.01) +
+            (4./4.) * np.exp(-((y-.75)**2)/0.01))
+
+
+def local_bumps(x, y, amplitude=1./4., cx=0.5, cy=0.5):
+    nx_off = cx - 0.1
+    px_off = cx + 0.1
+    ny_off = cy - 0.1
+    py_off = cy + 0.1
+
+    return (amplitude * np.exp(-((x - nx_off)**2+(y - ny_off)**2)/0.001) +
+            amplitude * np.exp(-((x - nx_off)**2+(y - cy)**2)/0.001) +
+            amplitude * np.exp(-((x - cx)**2+(y - ny_off)**2)/0.001) -
+            amplitude * np.exp(-((x - cx)**2+(y - cy)**2)/0.001) +
+            amplitude * np.exp(-((x - px_off)**2+(y - py_off)**2)/0.001) +
+            amplitude * np.exp(-((x - px_off)**2+(y - cy)**2)/0.001) +
+            amplitude * np.exp(-((x - cx)**2+(y - py_off)**2)/0.001) +
+            amplitude * np.exp(-((x - px_off)**2+(y - ny_off)**2)/0.001) +
+            amplitude * np.exp(-((x - nx_off)**2+(y - py_off)**2)/0.001))
+
+def local_bumps2(x, y, amplitude=1./4., cx=0.5, cy=0.5):
+    nx_off = cx - 0.1
+    px_off = cx + 0.1
+    ny_off = cy - 0.1
+    py_off = cy + 0.1
+
+    return (amplitude * np.exp(-((x - nx_off)**2+(y - ny_off)**2)/0.001) +
+            amplitude * np.exp(-((x - px_off)**2+(y - py_off)**2)/0.001) +
+            amplitude * np.exp(-((x - px_off)**2+(y - ny_off)**2)/0.001) +
+            amplitude * np.exp(-((x - nx_off)**2+(y - py_off)**2)/0.001))
+
+def gerber_bumpy(_x):
+    x, y = unpack2D(_x)
+    return (gerber(_x) +
+            (1/4.) * np.exp(-((x-0.25)**2+(y-0.25)**2)/0.09) +
+            local_bumps2(x, y, amplitude=1./8., cx=0.25, cy=0.25))
 
 def ranjan(_x):
     x, y = unpack2D(_x)
@@ -237,27 +282,27 @@ def strangulation(_x):
     x = _x[0]
     y = _x[1]
     return (0 -
-            (0.2) * np.exp(-(np.pow(x-0.25, 2) + np.pow(y-0.25, 2))/0.001) -
-            (0.2) * np.exp(-(np.pow(x-0.25, 2) + np.pow(y-0.75, 2))/0.001) -
-            (0.2) * np.exp(-(np.pow(x-0.75, 2) + np.pow(y-0.25, 2))/0.001) -
-            (0.2) * np.exp(-(np.pow(x-0.75, 2) + np.pow(y-0.75, 2))/0.001) +
-            (1.0) * np.exp(-(np.pow(x-0.50, 2) + np.pow(y-0.50, 2))/0.125))
+            (0.2) * np.exp(-(np.power(x-0.25, 2) + np.power(y-0.25, 2))/0.001) -
+            (0.2) * np.exp(-(np.power(x-0.25, 2) + np.power(y-0.75, 2))/0.001) -
+            (0.2) * np.exp(-(np.power(x-0.75, 2) + np.power(y-0.25, 2))/0.001) -
+            (0.2) * np.exp(-(np.power(x-0.75, 2) + np.power(y-0.75, 2))/0.001) +
+            (1.0) * np.exp(-(np.power(x-0.50, 2) + np.power(y-0.50, 2))/0.125))
     # return (0 +
-    #         (1.) * np.exp(-(np.pow(x-0.20, 2) + np.pow(y-0.20, 2))/0.005) +
-    #         (1.) * np.exp(-(np.pow(x-0.80, 2) + np.pow(y-0.20, 2))/0.005) -
-    #         (1.) * np.exp(-(np.pow(x-0.50, 2) + np.pow(y-0.25, 2))/0.05) -
-    #         (1.) * np.exp(-(np.pow(x-0.00, 2) + np.pow(y-0.00, 2))/0.01) -
-    #         (1.) * np.exp(-(np.pow(x-1.00, 2) + np.pow(y-0.00, 2))/0.01) -
-    #         (1.) * np.exp(-(np.pow(x-0.00, 2) + np.pow(y-1.00, 2))/0.01) -
-    #         (1.) * np.exp(-(np.pow(x-1.00, 2) + np.pow(y-1.00, 2))/0.01) +
-    #         (1.) * np.exp(-(np.pow(x-0.20, 2) + np.pow(y-0.80, 2))/0.01) +
-    #         (1.) * np.exp(-(np.pow(x-0.80, 2) + np.pow(y-0.80, 2))/0.01) +
-    #         (1.) * np.exp(-(np.pow(x-0.50, 2) + np.pow(y-0.10, 2))/0.01) +
-    #         (1.) * np.exp(-(np.pow(x-0.00, 2) + np.pow(y-0.50, 2))/0.01) +
-    #         (1.) * np.exp(-(np.pow(x-1.00, 2) + np.pow(y-0.50, 2))/0.005) +
-    #         (1.) * np.exp(-(np.pow(x-0.50, 2) + np.pow(y-0.90, 2))/0.01) +
-    #         (1.) * np.exp(-(np.pow(x-0.45, 2) + np.pow(y-0.65, 2))/0.01) +
-    #         (2.) * np.exp(-(np.pow(x-0.48, 2) + np.pow(y-0.52, 2))/0.001) +
+    #         (1.) * np.exp(-(np.power(x-0.20, 2) + np.power(y-0.20, 2))/0.005) +
+    #         (1.) * np.exp(-(np.power(x-0.80, 2) + np.power(y-0.20, 2))/0.005) -
+    #         (1.) * np.exp(-(np.power(x-0.50, 2) + np.power(y-0.25, 2))/0.05) -
+    #         (1.) * np.exp(-(np.power(x-0.00, 2) + np.power(y-0.00, 2))/0.01) -
+    #         (1.) * np.exp(-(np.power(x-1.00, 2) + np.power(y-0.00, 2))/0.01) -
+    #         (1.) * np.exp(-(np.power(x-0.00, 2) + np.power(y-1.00, 2))/0.01) -
+    #         (1.) * np.exp(-(np.power(x-1.00, 2) + np.power(y-1.00, 2))/0.01) +
+    #         (1.) * np.exp(-(np.power(x-0.20, 2) + np.power(y-0.80, 2))/0.01) +
+    #         (1.) * np.exp(-(np.power(x-0.80, 2) + np.power(y-0.80, 2))/0.01) +
+    #         (1.) * np.exp(-(np.power(x-0.50, 2) + np.power(y-0.10, 2))/0.01) +
+    #         (1.) * np.exp(-(np.power(x-0.00, 2) + np.power(y-0.50, 2))/0.01) +
+    #         (1.) * np.exp(-(np.power(x-1.00, 2) + np.power(y-0.50, 2))/0.005) +
+    #         (1.) * np.exp(-(np.power(x-0.50, 2) + np.power(y-0.90, 2))/0.01) +
+    #         (1.) * np.exp(-(np.power(x-0.45, 2) + np.power(y-0.65, 2))/0.01) +
+    #         (2.) * np.exp(-(np.power(x-0.48, 2) + np.power(y-0.52, 2))/0.001) +
     #         1e-2*y)
 
 
